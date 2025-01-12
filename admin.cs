@@ -29,17 +29,14 @@ static class Program
 
   static void WaitChildProcessExit()
   {
-    var currentProcessId = Environment.ProcessId;
-    string childProcessQuery =
+    var childEnum = new ManagementObjectSearcher(
       "SELECT * FROM Win32_Process " +
-      "WHERE ParentProcessId=" + currentProcessId;
-    var searcher = new ManagementObjectSearcher(childProcessQuery);
-    var childEnum = searcher.Get().GetEnumerator();
+      "WHERE ParentProcessId=" + Environment.ProcessId
+    ).Get().GetEnumerator();
     if (!childEnum.MoveNext()) return;
-    int childProcessID = Convert.ToInt32(childEnum.Current["ProcessId"]);
     try
     {
-      using (Process childProcess = Process.GetProcessById(childProcessID))
+      using (Process childProcess = Process.GetProcessById(Convert.ToInt32(childEnum.Current["ProcessId"])))
         childProcess.WaitForExit();
     }
     catch (ArgumentException)

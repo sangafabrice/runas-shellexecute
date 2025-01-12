@@ -1,4 +1,3 @@
-#Requires -PSEdition Core
 using namespace System.Management
 using namespace System.Diagnostics
 using namespace System.Runtime.InteropServices
@@ -27,12 +26,10 @@ function Start-AdminProcess {
 
 function Wait-ChildProcess {
   [CmdletBinding()]
-  $currentProcessId = [Environment]::ProcessId 
-  $childProcessQuery =
+  $childEnum = [ManagementObjectSearcher]::new(
     'SELECT * FROM Win32_Process ' +
-    'WHERE ParentProcessId=' + $currentProcessId
-  $searcher = [ManagementObjectSearcher]::new($childProcessQuery)
-  $childEnum = $searcher.Get().GetEnumerator()
+    'WHERE ParentProcessId=' + $PID
+  ).Get().GetEnumerator()
   if (-not $childEnum.MoveNext()) {
     return
   }

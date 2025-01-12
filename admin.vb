@@ -22,16 +22,13 @@ Module Program
   End Sub
 
   Sub WaitChildProcessExit()
-    Dim currentProcessId = Environment.ProcessId
-    Dim childProcessQuery =
+    Dim childEnum = (New ManagementObjectSearcher(
       "SELECT * FROM Win32_Process " &
-      "WHERE ParentProcessId=" & currentProcessId
-    Dim searcher As New ManagementObjectSearcher(childProcessQuery)
-    Dim childEnum = searcher.Get().GetEnumerator()
+      "WHERE ParentProcessId=" & Environment.ProcessId
+    )).Get().GetEnumerator()
     If Not childEnum.MoveNext() Then Exit Sub
-    Dim childProcessID = childEnum.Current("ProcessId")
     Try
-      Using childProcess = Process.GetProcessById(childProcessID)
+      Using childProcess = Process.GetProcessById(childEnum.Current("ProcessId"))
         childProcess.WaitForExit()
       End Using
     Catch ex As ArgumentException

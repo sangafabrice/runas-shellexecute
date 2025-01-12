@@ -25,17 +25,14 @@ function RunAsAdministrator(programExe, command, wait) {
 
 function WaitChildProcessExit() {
   var currentProcess = Process.GetCurrentProcess();
-  var currentProcessId = currentProcess.Id;
-  currentProcess.Dispose();
-  var childProcessQuery =
+  var childEnum = (new ManagementObjectSearcher(
     'SELECT * FROM Win32_Process ' +
-    'WHERE ParentProcessId=' + currentProcessId;
-  var searcher = new ManagementObjectSearcher(childProcessQuery);
-  var childEnum = searcher.Get().GetEnumerator();
+    'WHERE ParentProcessId=' + currentProcess.Id
+  )).Get().GetEnumerator();
+  currentProcess.Dispose();
   if (!childEnum.MoveNext()) return;
-  var childProcessID = childEnum.Current["ProcessId"];
   try {
-    var childProcess = Process.GetProcessById(childProcessID);
+    var childProcess = Process.GetProcessById(childEnum.Current["ProcessId"]);
     childProcess.WaitForExit();
     childProcess.Dispose();
   } catch (error: ArgumentException) { }

@@ -13,5 +13,7 @@ PS> .\admin.exe "powershell" "-NoExit"
 PS> dotnet build admin.vbproj
 PS> bin\Release\net9.0\admin.exe "powershell" "-NoExit"
 
+PS> powershell -NoProfile -File admin.ps1 "powershell" "-NoExit"
+
 PS> pwsh -NoProfile admin.ps1 "powershell" "-NoExit"
 ```

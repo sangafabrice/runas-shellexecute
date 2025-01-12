@@ -6,12 +6,11 @@ open System.Runtime.InteropServices
 open Shell32
 
 let WaitChildProcessExit () =
-  let currentProcessId = Environment.ProcessId |> string
-  let childProcessQuery =
-    "SELECT * FROM Win32_Process " +
-    "WHERE ParentProcessId=" + currentProcessId
-  let searcher = new ManagementObjectSearcher(childProcessQuery)
-  let childEnum = searcher.Get().GetEnumerator()
+  let childEnum = 
+    (new ManagementObjectSearcher(
+      "SELECT * FROM Win32_Process " +
+      "WHERE ParentProcessId=" + string(Environment.ProcessId)
+    )).Get().GetEnumerator()
   if childEnum.MoveNext() then
     try
       use childProcess =
