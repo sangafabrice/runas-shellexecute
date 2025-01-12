@@ -1,3 +1,4 @@
+#Requires -PSEdition Core
 using namespace System.Runtime.InteropServices
 using namespace System.Reflection
 using namespace Shell32
@@ -29,10 +30,8 @@ function Wait-ChildProcess {
     Get-CimInstance Win32_Process -Filter "ParentProcessID='$PID'" |
     Select-Object @{ Label = 'Id'; Expression = { $_.ProcessId } } |
     Get-Process -ErrorAction SilentlyContinue
-  if ($null -ne $childProcess) {
-    $childProcess.WaitForExit()
-    $childProcess.Dispose()
-  }
+  ${childProcess}?.WaitForExit()
+  ${childProcess}?.Dispose()
 }
 
 Start-AdminProcess $args[0] $args[1] -wait
