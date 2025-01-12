@@ -1,4 +1,5 @@
-#Requires -PSEdition Core
+using namespace System.Management
+using namespace System.Diagnostics
 using namespace System.Runtime.InteropServices
 using namespace System.Reflection
 using namespace Shell32
@@ -25,13 +26,23 @@ function Start-AdminProcess {
 
 function Wait-ChildProcess {
   [CmdletBinding()]
-  param ()
-  $childProcess =
-    Get-CimInstance Win32_Process -Filter "ParentProcessID='$PID'" |
-    Select-Object @{ Label = 'Id'; Expression = { $_.ProcessId } } |
-    Get-Process -ErrorAction SilentlyContinue
-  ${childProcess}?.WaitForExit()
-  ${childProcess}?.Dispose()
+  $currentProcess = [Process]::GetCurrentProcess()
+  $currentProcessId = $currentProcess.Id
+  $currentProcess.Dispose()
+  $childProcessQuery =
+    'SELECT * FROM Win32_Process ' +
+    'WHERE ParentProcessId=' + $currentProcessId
+  $searcher = [ManagementObjectSearcher]::new($childProcessQuery)
+  $childEnum = $searcher.Get().GetEnumerator()
+  if (-not $childEnum.MoveNext()) {
+    return
+  }
+  $childProcessID = $childEnum.Current['ProcessId'];
+  try {
+    $childProcess = [Process]::GetProcessById($childProcessID);
+    $childProcess.WaitForExit();
+    $childProcess.Dispose();
+  } catch [ArgumentException] { }
 }
 
 Start-AdminProcess $args[0] $args[1] -wait
