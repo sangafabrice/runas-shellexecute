@@ -2,3 +2,8 @@
 Interop.Shell32.dll
 # Path to executable
 admin.exe
+# Path to .NET Core executable
+bin\Release\net9.0\admin.exe
+# Other
+bin
+obj

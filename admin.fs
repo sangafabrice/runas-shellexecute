@@ -6,8 +6,7 @@ open System.Runtime.InteropServices
 open Shell32
 
 let WaitChildProcessExit () =
-  use currentProcess = Process.GetCurrentProcess()
-  let currentProcessId = currentProcess.Id |> string
+  let currentProcessId = Environment.ProcessId |> string
   let childProcessQuery =
     "SELECT * FROM Win32_Process " +
     "WHERE ParentProcessId=" + currentProcessId
@@ -33,7 +32,10 @@ let RunAsAdministrator (programExe: string) (arguments: string) (wait: bool) =
   Shell32 <- null
   if wait then WaitChildProcessExit()
 
-let args = Array.sub fsi.CommandLineArgs 1 2
-RunAsAdministrator args.[0] args.[1] true
-RunAsAdministrator args.[0] args.[1] false
-RunAsAdministrator args.[0] args.[1] false
+[<STAThread>]
+[<EntryPoint>]
+let main args =
+  RunAsAdministrator args.[0] args.[1] true
+  RunAsAdministrator args.[0] args.[1] false
+  RunAsAdministrator args.[0] args.[1] false
+  0

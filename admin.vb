@@ -22,10 +22,7 @@ Module Program
   End Sub
 
   Sub WaitChildProcessExit()
-    Dim currentProcessId As Integer
-    Using currentProcess = Process.GetCurrentProcess()
-      currentProcessId = currentProcess.Id
-    End Using
+    Dim currentProcessId = Environment.ProcessId
     Dim childProcessQuery =
       "SELECT * FROM Win32_Process " &
       "WHERE ParentProcessId=" & currentProcessId

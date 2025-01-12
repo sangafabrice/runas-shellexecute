@@ -3,9 +3,11 @@ using System.Management;
 using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Shell32;
 
 static class Program
 {
+  [STAThread]
   static void Main(string[] args)
   {
     RunAsAdministrator(args[0], args[1], true);
@@ -18,8 +20,7 @@ static class Program
   /// <param name="wait">The execution should pause til the process exits.</param>
   static void RunAsAdministrator(string programExe, string arguments, bool wait = false)
   {
-    Type ShellType = Type.GetTypeFromProgID("Shell.Application");
-    dynamic Shell32 = Activator.CreateInstance(ShellType);
+    Shell Shell32 = new();
     Shell32.ShellExecute(programExe, arguments, Missing.Value, "runas");
     Marshal.FinalReleaseComObject(Shell32);
     Shell32 = null;
@@ -28,9 +29,7 @@ static class Program
 
   static void WaitChildProcessExit()
   {
-    int currentProcessId;
-    using (Process currentProcess = Process.GetCurrentProcess())
-      currentProcessId = currentProcess.Id;
+    var currentProcessId = Environment.ProcessId;
     string childProcessQuery =
       "SELECT * FROM Win32_Process " +
       "WHERE ParentProcessId=" + currentProcessId;

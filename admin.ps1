@@ -1,3 +1,4 @@
+#Requires -PSEdition Core
 using namespace System.Management
 using namespace System.Diagnostics
 using namespace System.Runtime.InteropServices
@@ -26,9 +27,7 @@ function Start-AdminProcess {
 
 function Wait-ChildProcess {
   [CmdletBinding()]
-  $currentProcess = [Process]::GetCurrentProcess()
-  $currentProcessId = $currentProcess.Id
-  $currentProcess.Dispose()
+  $currentProcessId = [Environment]::ProcessId 
   $childProcessQuery =
     'SELECT * FROM Win32_Process ' +
     'WHERE ParentProcessId=' + $currentProcessId
