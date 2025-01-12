@@ -26,12 +26,19 @@ function Start-AdminProcess {
 function Wait-ChildProcess {
   [CmdletBinding()]
   param ()
-  $childProcess =
-    Get-CimInstance Win32_Process -Filter "ParentProcessID='$PID'" |
-    Select-Object @{ Label = 'Id'; Expression = { $_.ProcessId } } |
-    Get-Process -ErrorAction SilentlyContinue
-  ${childProcess}?.WaitForExit()
-  ${childProcess}?.Dispose()
+  try {
+    Get-Process |
+    ForEach-Object {
+      if (($shouldExit = $_.Parent.Id -eq $PID)) {
+        $_.WaitForExit()
+      }
+      $_.Dispose()
+      if ($shouldExit) {
+        throw
+      }
+    }
+  }
+  catch { }
 }
 
 Start-AdminProcess $args[0] $args[1] -wait
